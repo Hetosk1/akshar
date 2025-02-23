@@ -1,7 +1,6 @@
-import {ethers} from 'ethers';
+import {ethers} from'ethers';
 
-const contractAddress = "0x55046A212991b8eb8Ec7F358fA1577f5332c8696"; 
-const contractABI = [
+export const contractABI =  [
     {
       "anonymous": false,
       "inputs": [
@@ -67,7 +66,13 @@ const contractABI = [
         }
       ],
       "name": "uploadFile",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -113,28 +118,13 @@ const contractABI = [
       "stateMutability": "view",
       "type": "function"
     }
-];
+];  
 
-const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545"); // Connect to Ganache
-const privateKey = "0x00c93ee984624c3c43f307afea9a183f1663d28f117f22290db9610e084e12cf"; // Replace with your Ganache private key
-const signer = new ethers.Wallet(privateKey, provider);
+export const contractAddress = "0x0be00a5Cef1c18C2dD3e861A4b0c1100EBEf2F16"
 
-const contract = new ethers.Contract(contractAddress, contractABI, signer);
+export const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545"); // Connect to Ganache
+export const privateKey = "0x00c93ee984624c3c43f307afea9a183f1663d28f117f22290db9610e084e12cf"; // Replace with your Ganache private key
+export const signer = new ethers.Wallet(privateKey, provider);
 
-
-console.log(contract)
-
-async function uploadFile(ipfsHash, addressAccessList){
-  const file = await contract.uploadFile(ipfsHash, addressAccessList);
-  console.log(file);
-}
-
-async function handleEvent(fileId, ipfsHash, owner, accessList){
-  console.log('avvv kaleja');
-  console.log(fileId, ipfsHash, owner, accessList);
-}
-
-contract.on("FileUploaded", handleEvent);
-
-uploadFile("123123123123132", ["0x92E563d2f15fa37539F262C9e6dA42B04480eCE2", "0xC9F4E2B5443bE84E6cb15A5B6516FCf337D5bd9c"])
+export const AdminContract = new ethers.Contract(contractAddress, contractABI, signer);
 

@@ -5,7 +5,7 @@ const Home = () => {
     
     const { address, isConnected, connectWallet } = useEther();
     
-    if(!localStorage.getItem('address')) {
+    if(isConnected != true) {
         return <Navigate to='/' replace/>
     }
 

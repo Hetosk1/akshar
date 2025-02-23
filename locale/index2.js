@@ -1,7 +1,5 @@
 import {ethers} from 'ethers';
-
-const contractAddress = "0x55046A212991b8eb8Ec7F358fA1577f5332c8696"; 
-const contractABI = [
+export const contractABI =  [
     {
       "anonymous": false,
       "inputs": [
@@ -67,7 +65,13 @@ const contractABI = [
         }
       ],
       "name": "uploadFile",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -113,10 +117,12 @@ const contractABI = [
       "stateMutability": "view",
       "type": "function"
     }
-];
+];  
+
+export const contractAddress = "0x0be00a5Cef1c18C2dD3e861A4b0c1100EBEf2F16"
 
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545"); // Connect to Ganache
-const privateKey = "0x00c93ee984624c3c43f307afea9a183f1663d28f117f22290db9610e084e12cf"; // Replace with your Ganache private key
+const privateKey = "0xba718777a62f96738b6f9a56cdef1672ce5cedf69537580a476baa9c45728f94"; // Replace with your Ganache private key
 const signer = new ethers.Wallet(privateKey, provider);
 
 const contract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -124,17 +130,15 @@ const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
 console.log(contract)
 
-async function uploadFile(ipfsHash, addressAccessList){
-  const file = await contract.uploadFile(ipfsHash, addressAccessList);
-  console.log(file);
+async function getFile(fileId) {
+    try{
+        const ipfsHash = await contract.getFile(fileId)
+        console.log(ipfsHash);
+    } catch(e) {
+        console.log(e.message);
+    }
+
 }
 
-async function handleEvent(fileId, ipfsHash, owner, accessList){
-  console.log('avvv kaleja');
-  console.log(fileId, ipfsHash, owner, accessList);
-}
-
-contract.on("FileUploaded", handleEvent);
-
-uploadFile("123123123123132", ["0x92E563d2f15fa37539F262C9e6dA42B04480eCE2", "0xC9F4E2B5443bE84E6cb15A5B6516FCf337D5bd9c"])
+getFile('0xd9bea52a991bc2a106597c0a9438c441c64dc7146f1352826a708f6b62d7d786');
 

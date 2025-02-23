@@ -1,3 +1,5 @@
+import { intro, select, outro, text, spinner } from "@clack/prompts";
+import fs from "fs";
 import {ethers} from 'ethers';
 
 const contractAddress = "0x55046A212991b8eb8Ec7F358fA1577f5332c8696"; 
@@ -113,7 +115,7 @@ const contractABI = [
       "stateMutability": "view",
       "type": "function"
     }
-];
+  ];
 
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545"); // Connect to Ganache
 const privateKey = "0x00c93ee984624c3c43f307afea9a183f1663d28f117f22290db9610e084e12cf"; // Replace with your Ganache private key
@@ -122,19 +124,49 @@ const signer = new ethers.Wallet(privateKey, provider);
 const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
 
+
 console.log(contract)
 
-async function uploadFile(ipfsHash, addressAccessList){
-  const file = await contract.uploadFile(ipfsHash, addressAccessList);
-  console.log(file);
+
+
+
+async function main() {
+    intro("Welcome to the File Management CLI");
+
+    const action = await select({
+        message: "Choose an option:",
+        options: [
+            { value: "upload", label: "📤 Upload File" },
+            { value: "grant", label: "🔑 Grant Access" },
+            { value: "get", label: "📥 Get File" },
+        ],
+    });
+
+    if (action === "upload") {
+        const filePath = await text({ message: "Enter the file path to upload:" });
+
+        if (fs.existsSync(filePath)) {
+            const s = spinner();
+            s.start("Uploading file...");
+            await new Promise((res) => setTimeout(res, 2000)); // Simulate upload
+            s.stop("✅ File uploaded successfully!");
+        } else {
+            console.log("❌ File not found!");
+        }
+    }
+
+    if (action === "grant") {
+        const userAddress = await text({ message: "Enter the Ethereum address to grant access:" });
+        console.log(`✅ Access granted to ${userAddress}`);
+    }
+
+    if (action === "get") {
+        const fileName = await text({ message: "Enter the file name to retrieve:" });
+        console.log(`📥 Retrieving file: ${fileName}`);
+    }
+
+    outro("Thank you for using the CLI!");
 }
 
-async function handleEvent(fileId, ipfsHash, owner, accessList){
-  console.log('avvv kaleja');
-  console.log(fileId, ipfsHash, owner, accessList);
-}
-
-contract.on("FileUploaded", handleEvent);
-
-uploadFile("123123123123132", ["0x92E563d2f15fa37539F262C9e6dA42B04480eCE2", "0xC9F4E2B5443bE84E6cb15A5B6516FCf337D5bd9c"])
+main();
 
