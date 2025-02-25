@@ -1,6 +1,6 @@
 import {ethers} from'ethers';
 
-export const contractABI =  [
+export const contractABI = [
     {
       "anonymous": false,
       "inputs": [
@@ -118,9 +118,9 @@ export const contractABI =  [
       "stateMutability": "view",
       "type": "function"
     }
-];  
+  ]
 
-export const contractAddress = "0x0be00a5Cef1c18C2dD3e861A4b0c1100EBEf2F16"
+export const contractAddress = "0x73156dc668916D36CB2D2150A58C280e11dd1D3A"
 
 export const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545"); // Connect to Ganache
 export const privateKey = "0x00c93ee984624c3c43f307afea9a183f1663d28f117f22290db9610e084e12cf"; // Replace with your Ganache private key
