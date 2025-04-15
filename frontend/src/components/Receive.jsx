@@ -1,6 +1,6 @@
 import { useEther } from "../contexts/etherContext";
 import { Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from 'react-hot-toast';
 
 const Receive = () => {
@@ -10,17 +10,62 @@ const Receive = () => {
         return <Navigate to="/" replace />;
     }
 
-    console.log(address);
-
     const [fileId, setFileId] = useState('');
     const [ipfsHash, setIpfsHash] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fileFound, setFileFound] = useState(false);
+    
+    // New state for user's file list
+    const [userFiles, setUserFiles] = useState([]);
+    const [filesLoading, setFilesLoading] = useState(false);
+    const [filesError, setFilesError] = useState('');
 
-    if (!isConnected) {
-        return <Navigate to="/" replace />;
+const fetchUserFiles = async () => {
+    if (!address) return;
+
+    setFilesLoading(true);
+    setFilesError('');
+
+    try {
+        const response = await fetch(`http://localhost:3000/file/${address}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
+        const data = await response.json();
+        
+        console.log('Received data:', data);
+
+        // More robust checking of file list
+        if (data.user && Array.isArray(data.user.files)) {
+            setUserFiles(data.user.files);
+            
+            if (data.user.files.length === 0) {
+                console.log('No files found for this address');
+            }
+        } else {
+            console.log('Unexpected data structure:', data);
+            setUserFiles([]);
+        }
+    } catch (error) {
+        console.error('Full error details:', error);
+        setFilesError(`Detailed error: ${error.message}`);
+        toast.error(`File fetch error: ${error.message}`);
+    } finally {
+        setFilesLoading(false);
     }
+};
+
+    // Fetch files when component mounts or address changes
+    useEffect(() => {
+        fetchUserFiles();
+    }, [address]);
 
     const handleFileIdChange = (e) => {
         setFileId(e.target.value);
@@ -33,8 +78,8 @@ const Receive = () => {
         e.preventDefault();
         
         setLoading(true);
-        setError('');  // Clear previous errors
-        setFileFound(false);  // Reset the fileFound flag
+        setError('');
+        setFileFound(false);
 
         try {
             const ipfsHash = await getFileLink(fileId);
@@ -63,6 +108,34 @@ const Receive = () => {
     return (
         <div className="upload-container">
             <div className="upload-card">
+                {/* User Files Section */}
+                <div className="user-files-section">
+                    <h3>Your Files</h3>
+                    {filesLoading ? (
+                        <p>Loading files...</p>
+                    ) : filesError ? (
+                        <p className="error-message">{filesError}</p>
+                    ) : userFiles.length > 0 ? (
+                        <div className="file-list">
+                            {userFiles.map((file, index) => (
+                                <div key={index} className="file-item">
+                                    <span 
+                                        className="file-id"
+                                        onClick={() => {
+                                            setFileId(file);
+                                            toast.success('File ID copied to input');
+                                        }}
+                                    >
+                                        {file}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p>No files found</p>
+                    )}
+                </div>
+
                 <h2 className="upload-title">Receive File from Akshar</h2>
 
                 <form className="upload-form" onSubmit={fetchFileFromContract}>
@@ -73,6 +146,7 @@ const Receive = () => {
                             onChange={handleFileIdChange}
                             className="address-input"
                             disabled={loading}
+                            placeholder="Enter File ID"
                         />
                         <p className="file-info">Enter the File ID provided by the sender</p>
                     </div>

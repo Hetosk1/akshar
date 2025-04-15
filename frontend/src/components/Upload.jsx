@@ -78,6 +78,19 @@ const Upload = () => {
 
             const fileId = await uploadToSmartContract(data.IpfsHash, addresses);
 
+            for(let address of addresses) {
+                const responseAPI = await fetch(`http://localhost:3000/file/${address}`, { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fileId })
+                    
+                });
+
+                console.log(responseAPI);
+            }
+            
             console.log('Uploaded file with fileID: ' + fileId)
 
             setIpfsHash(fileId);
