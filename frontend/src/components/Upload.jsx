@@ -36,7 +36,6 @@ const Upload = () => {
 
     const addAddressField = () => {
         setAddresses([...addresses, '']);
-        console.log(addresses);
     };
 
     const uploadToIPFS = async () => {
@@ -71,10 +70,6 @@ const Upload = () => {
             }
 
             const data = await response.json();
-            console.log(data.IpfsHash);
-            console.log(ipfsHash);
-
-            console.log('Before going to smart contract....');
 
             const fileId = await uploadToSmartContract(data.IpfsHash, addresses);
 
@@ -85,13 +80,8 @@ const Upload = () => {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ fileId })
-                    
                 });
-
-                console.log(responseAPI);
             }
-            
-            console.log('Uploaded file with fileID: ' + fileId)
 
             setIpfsHash(fileId);
 
@@ -100,84 +90,100 @@ const Upload = () => {
             toast.error(err.message)
         } finally {
             toast('File Uploaded', {icon: '👏'})
-
             setUploading(false);
         }
     };
 
     return (
-        <div className="upload-container">
-            <div className="upload-card">
-                <h2 className="upload-title">Upload PDF to Akshar</h2>
+        <div className="upload-section">
+            <div className="container">
+                <div className="upload-card">
+                    <h2 className="section-title">Upload PDF to Akshar</h2>
+                    <p className="lead">Securely store your PDF documents on the blockchain with controlled access</p>
 
-        <form
-            className="upload-form"
-            onSubmit={async (e) => {
-                e.preventDefault(); // Handle event here instead of inside uploadToIPFS
-                if (uploading || !file) return;
-                try {
-                    await uploadToIPFS();
-                } catch (error) {
-                    console.error("Upload failed:", error);
-                }
-            }}
-        >
+                    <form
+                        className="upload-form"
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (uploading || !file) return;
+                            try {
+                                await uploadToIPFS();
+                            } catch (error) {
+                                console.error("Upload failed:", error);
+                            }
+                        }}
+                    >
+                        <div className="form-group">
+                            <label>Select PDF to Upload</label>
+                            <div className="file-input-wrapper">
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    accept=".pdf,application/pdf"
+                                    className="file-input"
+                                    disabled={uploading}
+                                    id="pdf-upload"
+                                />
+                                <label htmlFor="pdf-upload" className="file-label">
+                                    {file ? file.name : 'Choose PDF file'}
+                                </label>
+                            </div>
+                            <p className="file-info">Only PDF files are accepted</p>
+                        </div>
 
-        <div className="form-group">
-            <label>Select PDF to Upload</label>
-            <input
-                type="file"
-                onChange={handleFileChange}
-                accept=".pdf,application/pdf"
-                className="file-input"
-                disabled={uploading}
-            />
-            <p className="file-info">Only PDF files are accepted</p>
-        </div>
+                        <div className="form-group">
+                            <label>Addresses with access:</label>
+                            <div className="addresses-container">
+                                {addresses.map((addr, index) => (
+                                    <input
+                                        key={index}
+                                        type="text"
+                                        value={addr}
+                                        onChange={(e) => handleAddressChange(index, e.target.value)}
+                                        className="address-input"
+                                        placeholder="Enter Ethereum address"
+                                    />
+                                ))}
+                            </div>
+                            <button 
+                                type="button" 
+                                onClick={addAddressField} 
+                                className="btn btn-outline add-address-btn"
+                            >
+                                + Add address
+                            </button>
+                        </div>
 
-        <div className="form-group">
-            <label>Addresses with access:</label>
-            {addresses.map((addr, index) => (
-                <input
-                    key={index}
-                    type="text"
-                    value={addr}
-                    onChange={(e) => handleAddressChange(index, e.target.value)}
-                    className="address-input"
-                    placeholder="Enter Ethereum address"
-                />
-            ))}
-            <button type="button" onClick={addAddressField} className="add-address-btn">
-                + Add address
-            </button>
-        </div>
-
-        <button
-            type="submit"
-            disabled={uploading || !file}
-            className={`upload-btn ${uploading || !file ? 'disabled' : ''}`}
-        >
-            {uploading ? 'Uploading...' : 'Upload to Akshar'}
-        </button>
-    </form>
-
-                {error && <div className="error-message">{error}</div>}
-
-                {ipfsHash && (
-                    <div className="success-message">
-                        <p>PDF uploaded successfully!</p>
-                        <p className="ipfs-hash-label">File Id:</p>
-                        <p className="ipfs-hash">{ipfsHash}</p>
-                        <a
-                            href={`https://gateway.pinata.cloud/ipfs/${ipfsHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="view-ipfs-link"
+                        <button
+                            type="submit"
+                            disabled={uploading || !file}
+                            className={`btn btn-primary upload-btn ${uploading || !file ? 'disabled' : ''}`}
                         >
-                            View on IPFS
-                        </a>
-                    </div>
-                )}
+                            {uploading ? 'Uploading...' : 'Upload to Akshar'}
+                        </button>
+                    </form>
+
+                    {error && <div className="error-message">{error}</div>}
+
+                    {ipfsHash && (
+                        <div className="success-message">
+                            <div className="success-icon"></div>
+                            <h4>PDF uploaded successfully!</h4>
+                            <div className="ipfs-hash-container">
+                                <p className="ipfs-hash-label">File Id:</p>
+                                <p className="ipfs-hash">{ipfsHash}</p>
+                            </div>
+                            <a
+                                href={`https://gateway.pinata.cloud/ipfs/${ipfsHash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline view-ipfs-link"
+                            >
+                                View on IPFS
+                            </a>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
